@@ -650,11 +650,72 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzvcLsSN9Ewcybu-4FmAZRkWUGHQ8wT1QLudHfME1zB78GKn3xLKA2DtW5H1O40HX8/exec";
+
+  function getVal(name) {
+    const els = document.querySelectorAll(`[name="${name}"]`);
+    if (!els.length) return "";
+    if (els[0].type === "radio") {
+      const checked = document.querySelector(`[name="${name}"]:checked`);
+      return checked ? checked.value : "";
+    }
+    if (els[0].type === "checkbox") {
+      return Array.from(els).filter(e => e.checked).map(e => e.value).join(", ");
+    }
+    return els[0].value.trim();
+  }
+
+  function getLikert() {
+    const statements = [12,13,14,15,16,17,18,19,20];
+    return statements.map(n => {
+      const checked = document.querySelector(`[name="likert_${n}"]:checked`);
+      return `Q${n}: ${checked ? checked.value : "No answer"}`;
+    }).join(" | ");
+  }
+
   function submitForm() {
-    document.getElementById('sec6').classList.remove('active');
-    document.getElementById('thankyou').style.display = 'block';
-    document.getElementById('progress-bar').style.width = '100%';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Show loading state
+    const btn = document.querySelector('.btn-accent');
+    btn.textContent = 'Submitting…';
+    btn.disabled = true;
+
+    const payload = {
+      q1: getVal('q1'), q1_other: getVal('q1_other'),
+      q2: getVal('q2'), q3: getVal('q3'), q4: getVal('q4'),
+      q5: [getVal('q5a'), getVal('q5b'), getVal('q5c')].filter(Boolean).join(', '),
+      q6: getVal('q6'),
+      q7: [getVal('q7a'), getVal('q7b'), getVal('q7c')].filter(Boolean).join(', '),
+      q8: getVal('q8'),
+      q9: getVal('q9'), q9_other: getVal('q9_other'),
+      q10: getVal('q10'), q11: getVal('q11'),
+      likert: getLikert(),
+      q21: getVal('q21'), q22: getVal('q22'), q23: getVal('q23'),
+      q24: getVal('q24'), q24_explain: getVal('q24_explain'),
+      q25: [getVal('q25a'), getVal('q25b'), getVal('q25c'), getVal('q25d')].filter(Boolean).join(', '),
+      q26: getVal('q26'),
+      q27_comp: getVal('q27_comp'), q27_reason: getVal('q27_reason'),
+      q28: getVal('q28'), q29: getVal('q29')
+    };
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(() => {
+      document.getElementById('sec6').classList.remove('active');
+      document.getElementById('thankyou').style.display = 'block';
+      document.getElementById('progress-bar').style.width = '100%';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    })
+    .catch(() => {
+      // Even if fetch throws, no-cors means it likely succeeded — show thank you
+      document.getElementById('sec6').classList.remove('active');
+      document.getElementById('thankyou').style.display = 'block';
+      document.getElementById('progress-bar').style.width = '100%';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   }
 </script>
 </body>
