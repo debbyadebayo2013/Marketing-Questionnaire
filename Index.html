@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Banking Research Questionnaire</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy: #0d2137;
+    --blue: #1a4a7a;
+    --mid: #2e75b6;
+    --accent: #f0a500;
+    --light: #e8f1fa;
+    --bg: #f5f7fa;
+    --white: #ffffff;
+    --text: #1c2b3a;
+    --muted: #6b7c93;
+    --border: #d0dce8;
+    --success: #2ecc71;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* PROGRESS BAR */
+  #progress-bar-wrap {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: 5px; background: var(--border);
+  }
+  #progress-bar {
+    height: 100%; background: var(--accent);
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+    color: white; padding: 48px 24px 36px;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  header::before {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 220px; height: 220px; border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  header::after {
+    content: ''; position: absolute; bottom: -80px; left: -40px;
+    width: 280px; height: 280px; border-radius: 50%;
+    background: rgba(240,165,0,0.08);
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 700; letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  header .subtitle {
+    font-size: 1rem; color: rgba(255,255,255,0.75);
+    font-weight: 300; margin-bottom: 20px;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--accent); color: var(--navy);
+    font-size: 0.72rem; font-weight: 600;
+    padding: 4px 14px; border-radius: 20px;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+
+  /* NOTICE */
+  .notice {
+    background: var(--light); border-left: 4px solid var(--mid);
+    margin: 28px auto; max-width: 780px;
+    padding: 16px 20px; border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 0.9rem; color: var(--muted);
+  }
+  .notice strong { color: var(--blue); }
+
+  /* MAIN CONTAINER */
+  main { max-width: 780px; margin: 0 auto; padding: 0 20px 80px; }
+
+  /* SECTIONS */
+  .section {
+    display: none;
+    animation: fadeIn 0.35s ease;
+  }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-header {
+    background: linear-gradient(90deg, var(--navy), var(--blue));
+    color: white; padding: 14px 22px; border-radius: var(--radius) var(--radius) 0 0;
+    margin-top: 32px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-number {
+    background: var(--accent); color: var(--navy);
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9rem; flex-shrink: 0;
+  }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; }
+  .section-desc { font-size: 0.82rem; color: rgba(255,255,255,0.7); margin-top: 2px; }
+
+  .section-body {
+    background: var(--white);
+    border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 28px 28px 20px;
+  }
+
+  /* QUESTIONS */
+  .q-block { margin-bottom: 28px; }
+  .q-label {
+    font-weight: 600; font-size: 0.97rem; color: var(--navy);
+    margin-bottom: 12px; display: block; line-height: 1.5;
+  }
+  .q-label .q-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--light); color: var(--mid);
+    width: 26px; height: 26px; border-radius: 50%;
+    font-size: 0.8rem; font-weight: 700; margin-right: 8px; flex-shrink: 0;
+  }
+  .q-hint { font-size: 0.82rem; color: var(--muted); margin-top: -6px; margin-bottom: 10px; }
+
+  /* INPUTS */
+  input[type="text"], textarea {
+    width: 100%; border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 11px 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.93rem;
+    color: var(--text); background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    resize: vertical;
+  }
+  input[type="text"]:focus, textarea:focus {
+    outline: none; border-color: var(--mid);
+    box-shadow: 0 0 0 3px rgba(46,117,182,0.12);
+    background: white;
+  }
+  textarea { min-height: 100px; }
+
+  /* MULTI-INPUT ROWS */
+  .input-row { display: flex; flex-direction: column; gap: 8px; }
+  .input-row-label { font-size: 0.82rem; color: var(--muted); font-weight: 500; }
+  .input-with-label { display: flex; align-items: center; gap: 10px; }
+  .input-with-label span { font-size: 0.85rem; color: var(--muted); min-width: 60px; font-weight: 500; }
+
+  /* CHECKBOX / RADIO GRID */
+  .options-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+  }
+  .opt-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 8px;
+    border: 1.5px solid var(--border); cursor: pointer;
+    transition: all 0.18s; background: var(--bg);
+    font-size: 0.9rem;
+  }
+  .opt-item:hover { border-color: var(--mid); background: var(--light); }
+  .opt-item input { accent-color: var(--mid); width: 16px; height: 16px; flex-shrink: 0; }
+  .opt-item.selected { border-color: var(--mid); background: var(--light); }
+
+  /* LIKERT TABLE */
+  .likert-wrap { overflow-x: auto; }
+  table.likert {
+    width: 100%; border-collapse: collapse; font-size: 0.83rem;
+    min-width: 640px;
+  }
+  .likert thead th {
+    background: var(--navy); color: white;
+    padding: 10px 6px; text-align: center;
+    font-weight: 500; font-size: 0.75rem; line-height: 1.3;
+  }
+  .likert thead th:first-child { text-align: left; padding-left: 14px; min-width: 200px; }
+  .likert tbody tr:nth-child(even) { background: var(--bg); }
+  .likert tbody tr:hover { background: var(--light); }
+  .likert tbody td { padding: 11px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .likert tbody td:first-child { padding-left: 14px; font-size: 0.88rem; color: var(--text); }
+  .likert tbody td:not(:first-child) { text-align: center; }
+  .likert input[type="radio"] { accent-color: var(--mid); width: 17px; height: 17px; cursor: pointer; }
+
+  /* CRITICAL QUESTION */
+  .critical-box {
+    border: 2px solid var(--mid);
+    border-left: 6px solid var(--mid);
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, #ebf3fb, #f5f9ff);
+    padding: 22px 24px; margin-bottom: 8px;
+  }
+  .critical-tag {
+    display: inline-block; background: var(--mid); color: white;
+    font-size: 0.7rem; font-weight: 700; padding: 3px 10px;
+    border-radius: 4px; letter-spacing: 0.5px; text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .critical-box .q-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem; color: var(--navy); font-style: italic;
+    margin-bottom: 14px;
+  }
+
+  /* NAVIGATION */
+  .nav-wrap {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 30px; gap: 12px;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 26px; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.93rem;
+    font-weight: 600; cursor: pointer; border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--navy); color: white;
+  }
+  .btn-primary:hover { background: var(--blue); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(13,33,55,0.25); }
+  .btn-outline {
+    background: transparent; color: var(--navy);
+    border: 1.5px solid var(--border);
+  }
+  .btn-outline:hover { border-color: var(--navy); background: var(--light); }
+  .btn-accent {
+    background: var(--accent); color: var(--navy);
+  }
+  .btn-accent:hover { background: #e09900; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(240,165,0,0.3); }
+
+  .step-indicator { font-size: 0.82rem; color: var(--muted); }
+
+  /* THANK YOU */
+  #thankyou {
+    display: none; text-align: center;
+    padding: 60px 20px; animation: fadeIn 0.5s ease;
+  }
+  .ty-icon { font-size: 4rem; margin-bottom: 20px; }
+  .ty-title { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--navy); margin-bottom: 12px; }
+  .ty-sub { font-size: 1rem; color: var(--muted); max-width: 500px; margin: 0 auto 28px; line-height: 1.6; }
+
+  /* DIVIDER */
+  hr.q-div { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  footer {
+    text-align: center; padding: 20px; font-size: 0.78rem; color: var(--muted);
+    border-top: 1px solid var(--border); margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+<header>
+  <h1>Market Research Questionnaire</h1>
+  <div class="subtitle">Banking &amp; Financial Services — Customer Acquisition &amp; Retention Study</div>
+  <span class="badge">Confidential · Academic Use Only</span>
+</header>
+
+<main>
+  <div class="notice">
+    <strong>Study Purpose:</strong> This questionnaire gathers insights from employees and key stakeholders on factors driving or hindering customer acquisition and retention. All responses are strictly confidential and used solely for academic and strategic planning purposes. <em>Estimated time: 10–15 minutes.</em>
+  </div>
+
+  <!-- ============ SECTION 1 ============ -->
+  <div class="section active" id="sec1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div><div class="section-title">Respondent Profile</div><div class="section-desc">Background information · ~2 minutes</div></div>
+    </div>
+    <div class="section-body">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">1</span>What is your current role/job function within the bank?</label>
+        <div class="options-grid">
+          <label class="opt-item"><input type="checkbox" name="q1" value="Front Office / Customer Facing"> Front Office / Customer Facing</label>
+          <label class="opt-item"><input type="checkbox" name="q1" value="Marketing / Communications"> Marketing / Communications</label>
+          <label class="opt-item"><input type="checkbox" name="q1" value="Sales"> Sales</label>
+          <label class="opt-item"><input type="checkbox" name="q1" value="Operations / Back Office"> Operations / Back Office</label>
+          <label class="opt-item"><input type="checkbox" name="q1" value="Risk & Compliance"> Risk &amp; Compliance</label>
+          <label class="opt-item"><input type="checkbox" name="q1" value="Senior / Executive Management"> Senior / Executive Management</label>
+          <label class="opt-item"><input type="checkbox" name="q1" value="Technology / Digital"> Technology / Digital</label>
+          <label class="opt-item"><input type="checkbox" name="q1" value="Other"> Other (specify below)</label>
+        </div>
+        <div style="margin-top:10px"><input type="text" name="q1_other" placeholder="If Other, please specify…"></div>
+      </div>
+
+      <hr class="q-div">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">2</span>How many years have you worked in this organisation?</label>
+        <div class="options-grid">
+          <label class="opt-item"><input type="radio" name="q2" value="Less than 1 year"> Less than 1 year</label>
+          <label class="opt-item"><input type="radio" name="q2" value="1–3 years"> 1 – 3 years</label>
+          <label class="opt-item"><input type="radio" name="q2" value="3–5 years"> 3 – 5 years</label>
+          <label class="opt-item"><input type="radio" name="q2" value="5–10 years"> 5 – 10 years</label>
+          <label class="opt-item"><input type="radio" name="q2" value="Over 10 years"> Over 10 years</label>
+        </div>
+      </div>
+
+      <hr class="q-div">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">3</span>Which state, region or country are you based in?</label>
+        <input type="text" name="q3" placeholder="e.g. Lagos, Nigeria">
+      </div>
+
+      <hr class="q-div">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">4</span>In your role, how frequently do you interact with customers?</label>
+        <div class="options-grid">
+          <label class="opt-item"><input type="radio" name="q4" value="Daily"> Daily</label>
+          <label class="opt-item"><input type="radio" name="q4" value="Several times a week"> Several times a week</label>
+          <label class="opt-item"><input type="radio" name="q4" value="Occasionally"> Occasionally</label>
+          <label class="opt-item"><input type="radio" name="q4" value="Rarely / Never"> Rarely / Never</label>
+        </div>
+      </div>
+
+      <div class="nav-wrap">
+        <span class="step-indicator">Section 1 of 6</span>
+        <button class="btn btn-primary" onclick="goTo(2)">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 2 ============ -->
+  <div class="section" id="sec2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div><div class="section-title">Brand Awareness &amp; Market Perception</div><div class="section-desc">Marketplace perceptions · ~3 minutes</div></div>
+    </div>
+    <div class="section-body">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">5</span>When customers think of banking services in Nigeria, which banks come to mind first? (List up to 3)</label>
+        <div class="input-row">
+          <div class="input-with-label"><span>1st:</span><input type="text" name="q5a" placeholder="First bank…"></div>
+          <div class="input-with-label"><span>2nd:</span><input type="text" name="q5b" placeholder="Second bank…"></div>
+          <div class="input-with-label"><span>3rd:</span><input type="text" name="q5c" placeholder="Third bank…"></div>
+        </div>
+      </div>
+
+      <hr class="q-div">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">6</span>Which banks do you believe are currently most aggressive in acquiring new customers?</label>
+        <input type="text" name="q6" placeholder="Your response…">
+      </div>
+
+      <hr class="q-div">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">7</span>What do you think makes customers choose a bank and stay loyal to it? (List your top 3 reasons)</label>
+        <div class="input-row">
+          <div class="input-with-label"><span>Reason 1:</span><input type="text" name="q7a" placeholder=""></div>
+          <div class="input-with-label"><span>Reason 2:</span><input type="text" name="q7b" placeholder=""></div>
+          <div class="input-with-label"><span>Reason 3:</span><input type="text" name="q7c" placeholder=""></div>
+        </div>
+      </div>
+
+      <hr class="q-div">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">8</span>Based on your interactions, what do customers most frequently complain about regarding our bank's services?</label>
+        <textarea name="q8" placeholder="Please describe…"></textarea>
+      </div>
+
+      <div class="nav-wrap">
+        <button class="btn btn-outline" onclick="goTo(1)">&larr; Back</button>
+        <span class="step-indicator">Section 2 of 6</span>
+        <button class="btn btn-primary" onclick="goTo(3)">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 3 ============ -->
+  <div class="section" id="sec3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div><div class="section-title">Customer Acquisition Insights</div><div class="section-desc">Why customers choose (or don't) · ~3 minutes</div></div>
+    </div>
+    <div class="section-body">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">9</span>In your observation, what is the primary reason new customers open an account with our bank?</label>
+        <div class="options-grid">
+          <label class="opt-item"><input type="checkbox" name="q9" value="Competitive interest rates"> Competitive interest rates</label>
+          <label class="opt-item"><input type="checkbox" name="q9" value="Digital/mobile banking features"> Digital/mobile banking features</label>
+          <label class="opt-item"><input type="checkbox" name="q9" value="Proximity of branches/state offices"> Proximity of branches/offices</label>
+          <label class="opt-item"><input type="checkbox" name="q9" value="Brand reputation & trust"> Brand reputation &amp; trust</label>
+          <label class="opt-item"><input type="checkbox" name="q9" value="Referral from existing merchant"> Referral from existing merchant</label>
+          <label class="opt-item"><input type="checkbox" name="q9" value="Promotional offers / incentives"> Promotional offers / incentives</label>
+          <label class="opt-item"><input type="checkbox" name="q9" value="Competitive pricing"> Competitive pricing</label>
+          <label class="opt-item"><input type="checkbox" name="q9" value="Other"> Other (specify below)</label>
+        </div>
+        <div style="margin-top:10px"><input type="text" name="q9_other" placeholder="If Other, please specify…"></div>
+      </div>
+
+      <hr class="q-div">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">10</span>What do you believe is the MAIN barrier preventing potential customers from choosing our bank over competitors?</label>
+        <textarea name="q10" placeholder="Please describe the main barrier…"></textarea>
+      </div>
+
+      <hr class="q-div">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">11</span>Which of these acquisition strategies do you think our competitors use most effectively that we currently do not?</label>
+        <div class="options-grid">
+          <label class="opt-item"><input type="checkbox" name="q11" value="Aggressive digital/social media campaigns"> Aggressive digital/social media campaigns</label>
+          <label class="opt-item"><input type="checkbox" name="q11" value="Superior mobile app onboarding"> Superior mobile app onboarding</label>
+          <label class="opt-item"><input type="checkbox" name="q11" value="Lower account opening requirements"> Lower account opening requirements</label>
+          <label class="opt-item"><input type="checkbox" name="q11" value="Attractive sign-up bonuses/promotions"> Attractive sign-up bonuses/promotions</label>
+          <label class="opt-item"><input type="checkbox" name="q11" value="Strong agent banking network"> Strong agent banking network</label>
+          <label class="opt-item"><input type="checkbox" name="q11" value="Personalised customer outreach"> Personalised customer outreach</label>
+          <label class="opt-item"><input type="checkbox" name="q11" value="New innovative products"> New innovative products</label>
+        </div>
+      </div>
+
+      <div class="nav-wrap">
+        <button class="btn btn-outline" onclick="goTo(2)">&larr; Back</button>
+        <span class="step-indicator">Section 3 of 6</span>
+        <button class="btn btn-primary" onclick="goTo(4)">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 4 ============ -->
+  <div class="section" id="sec4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div><div class="section-title">Customer Retention Insights</div><div class="section-desc">Loyalty &amp; satisfaction perceptions · ~3 minutes</div></div>
+    </div>
+    <div class="section-body">
+
+      <div class="q-block">
+        <label class="q-label" style="margin-bottom:16px">Retention &amp; Loyalty Perceptions — <em style="font-weight:400;color:var(--muted)">indicate your level of agreement for each statement (7-point scale)</em></label>
+        <div class="likert-wrap">
+          <table class="likert">
+            <thead>
+              <tr>
+                <th>Statement</th>
+                <th>Strongly Agree</th>
+                <th>Agree</th>
+                <th>Somewhat Agree</th>
+                <th>Undecided</th>
+                <th>Somewhat Disagree</th>
+                <th>Disagree</th>
+                <th>Strongly Disagree</th>
+              </tr>
+            </thead>
+            <tbody id="likert-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <hr class="q-div">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">21</span>In your view, what is the single most important reason customers leave our bank for a competitor?</label>
+        <textarea name="q21" placeholder="Please describe…"></textarea>
+      </div>
+
+      <div class="nav-wrap">
+        <button class="btn btn-outline" onclick="goTo(3)">&larr; Back</button>
+        <span class="step-indicator">Section 4 of 6</span>
+        <button class="btn btn-primary" onclick="goTo(5)">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 5 ============ -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div><div class="section-title">The Missing Link — Key Research Question</div><div class="section-desc">Most important section · Please reflect carefully</div></div>
+    </div>
+    <div class="section-body">
+
+      <div class="q-block">
+        <div class="critical-box">
+          <div class="critical-tag">Key Research Question — Q22</div>
+          <div class="q-label">Tell me what customers want in our bank's products and services that similar but competing banks are not currently offering — and that we, as a bank, have the potential to deliver.</div>
+          <textarea name="q22" placeholder="Please share your candid, detailed response here…" style="min-height:140px; background:white;"></textarea>
+        </div>
+      </div>
+
+      <hr class="q-div">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">23</span>If you could change ONE thing about how our bank markets itself to attract and retain customers, what would it be?</label>
+        <textarea name="q23" placeholder="Your suggestion…"></textarea>
+      </div>
+
+      <hr class="q-div">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">24</span>Are there any customer segments that you feel our bank is underserving or ignoring?</label>
+        <div class="options-grid">
+          <label class="opt-item"><input type="checkbox" name="q24" value="Youth / Gen Z"> Youth / Gen Z</label>
+          <label class="opt-item"><input type="checkbox" name="q24" value="Small & Medium Enterprises (SMEs)"> Small &amp; Medium Enterprises (SMEs)</label>
+          <label class="opt-item"><input type="checkbox" name="q24" value="Diaspora / Non-Resident Nigerians"> Diaspora / Non-Resident Nigerians</label>
+          <label class="opt-item"><input type="checkbox" name="q24" value="Women Entrepreneurs"> Women Entrepreneurs</label>
+          <label class="opt-item"><input type="checkbox" name="q24" value="High Net Worth Individuals"> High Net Worth Individuals</label>
+          <label class="opt-item"><input type="checkbox" name="q24" value="Rural / Unbanked Population"> Rural / Unbanked Population</label>
+          <label class="opt-item"><input type="checkbox" name="q24" value="Business Owners"> Business Owners</label>
+        </div>
+        <div style="margin-top:14px">
+          <label style="font-size:0.85rem;color:var(--muted);font-weight:500;display:block;margin-bottom:6px">Please explain why you selected the above:</label>
+          <textarea name="q24_explain" placeholder="Your explanation…" style="min-height:80px;"></textarea>
+        </div>
+      </div>
+
+      <div class="nav-wrap">
+        <button class="btn btn-outline" onclick="goTo(4)">&larr; Back</button>
+        <span class="step-indicator">Section 5 of 6</span>
+        <button class="btn btn-primary" onclick="goTo(6)">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 6 ============ -->
+  <div class="section" id="sec6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div><div class="section-title">Competitive Landscape &amp; Brand Visibility</div><div class="section-desc">Competitor perceptions</div></div>
+    </div>
+    <div class="section-body">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">25</span>Which banks in Nigeria pose the greatest competitive threat to us in acquiring and retaining customers?</label>
+        <div class="input-row">
+          <div class="input-with-label"><span>1:</span><input type="text" name="q25a" placeholder="Bank name…"></div>
+          <div class="input-with-label"><span>2:</span><input type="text" name="q25b" placeholder="Bank name…"></div>
+          <div class="input-with-label"><span>3:</span><input type="text" name="q25c" placeholder="Bank name…"></div>
+          <div class="input-with-label"><span>4:</span><input type="text" name="q25d" placeholder="Bank name…"></div>
+        </div>
+      </div>
+
+      <hr class="q-div">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">26</span>How frequently do you notice marketing communications (adverts, promotions, campaigns) from our competitors?</label>
+        <div class="options-grid">
+          <label class="opt-item"><input type="radio" name="q26" value="Daily"> Daily</label>
+          <label class="opt-item"><input type="radio" name="q26" value="Several times a week"> Several times a week</label>
+          <label class="opt-item"><input type="radio" name="q26" value="Once a week"> Once a week</label>
+          <label class="opt-item"><input type="radio" name="q26" value="Rarely"> Rarely</label>
+        </div>
+      </div>
+
+      <hr class="q-div">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">27</span>Which competitor has the most compelling marketing message currently, and why?</label>
+        <div class="input-with-label" style="margin-bottom:10px"><span>Competitor:</span><input type="text" name="q27_comp" placeholder="Bank name…"></div>
+        <label style="font-size:0.85rem;color:var(--muted);font-weight:500;display:block;margin-bottom:6px">Reason:</label>
+        <textarea name="q27_reason" placeholder="Why do you think their message is compelling?"></textarea>
+      </div>
+
+      <hr class="q-div">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">28</span>Overall, how would you rate our bank's current marketing &amp; communications efforts compared to competitors?</label>
+        <div class="options-grid">
+          <label class="opt-item"><input type="radio" name="q28" value="Far ahead of competition"> Far ahead of competition</label>
+          <label class="opt-item"><input type="radio" name="q28" value="Slightly ahead"> Slightly ahead</label>
+          <label class="opt-item"><input type="radio" name="q28" value="About the same"> About the same</label>
+          <label class="opt-item"><input type="radio" name="q28" value="Slightly behind"> Slightly behind</label>
+          <label class="opt-item"><input type="radio" name="q28" value="Significantly behind"> Significantly behind</label>
+        </div>
+      </div>
+
+      <hr class="q-div">
+
+      <div class="q-block">
+        <label class="q-label"><span class="q-num">29</span>Please share any other observations, ideas, or recommendations regarding our bank's customer acquisition and retention strategy:</label>
+        <textarea name="q29" placeholder="Additional comments…" style="min-height:120px;"></textarea>
+      </div>
+
+      <div class="nav-wrap">
+        <button class="btn btn-outline" onclick="goTo(5)">&larr; Back</button>
+        <span class="step-indicator">Section 6 of 6</span>
+        <button class="btn btn-accent" onclick="submitForm()">Submit Responses ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- THANK YOU -->
+  <div id="thankyou">
+    <div class="ty-icon">🎉</div>
+    <div class="ty-title">Thank You!</div>
+    <div class="ty-sub">Your responses have been recorded. Your insights are invaluable to improving our bank's market position and shaping our marketing strategy.</div>
+    <p style="font-size:0.82rem;color:var(--muted);font-style:italic;">Lagos Business School · Introduction to Marketing · Executive MBA Programme</p>
+  </div>
+</main>
+
+<footer>
+  Banking &amp; Financial Services · Customer Acquisition &amp; Retention Study · Confidential — Academic Use Only
+</footer>
+
+<script>
+  const likertStatements = [
+    "Our bank consistently delivers on promises made to customers",
+    "Our digital banking platform (app/USSD) meets the expectations of today's customers",
+    "Our customer service response times are competitive compared to other banks",
+    "Our bank proactively communicates relevant product updates to customers",
+    "Our loyalty/reward programmes effectively incentivise customers to stay",
+    "Customers who leave our bank typically move to a specific competitor",
+    "Our bank resolves customer complaints satisfactorily and promptly",
+    "Our interest rates and fees are perceived as fair and competitive by customers",
+    "Our bank's brand image encourages customers to recommend us to others"
+  ];
+  const likertLabels = ["Strongly Agree","Agree","Somewhat Agree","Undecided","Somewhat Disagree","Disagree","Strongly Disagree"];
+  const tbody = document.getElementById('likert-body');
+  likertStatements.forEach((stmt, i) => {
+    const tr = document.createElement('tr');
+    const qNum = i + 12;
+    tr.innerHTML = `<td>${qNum}. ${stmt}</td>` +
+      likertLabels.map((l, j) =>
+        `<td><input type="radio" name="likert_${qNum}" value="${l}" aria-label="${l}"></td>`
+      ).join('');
+    tbody.appendChild(tr);
+  });
+
+  // Checkbox selected style
+  document.querySelectorAll('.opt-item input').forEach(inp => {
+    inp.addEventListener('change', () => {
+      document.querySelectorAll(`input[name="${inp.name}"]`).forEach(i => {
+        i.closest('.opt-item').classList.toggle('selected', i.checked);
+      });
+    });
+  });
+
+  let currentSection = 1;
+  const totalSections = 6;
+
+  function goTo(n) {
+    document.getElementById('sec' + currentSection).classList.remove('active');
+    currentSection = n;
+    document.getElementById('sec' + currentSection).classList.add('active');
+    document.getElementById('progress-bar').style.width = ((n - 1) / totalSections * 100) + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function submitForm() {
+    document.getElementById('sec6').classList.remove('active');
+    document.getElementById('thankyou').style.display = 'block';
+    document.getElementById('progress-bar').style.width = '100%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
